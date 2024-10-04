@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator with Favorites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #memeContainer {
+            margin-top: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #favoriteBtn {
+            background-color: #007bff;
+        }
+
+        #favoriteBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Random Meme Generator</h1>
+    <button id="generateMemeBtn">Generate Meme</button>
+    <button id="favoriteBtn" disabled>Add to Favorites</button>
+
+    <div id="memeContainer">
+        <!-- Meme will be displayed here -->
+    </div>
+
+    <script>
+        let currentMemeUrl = ''; // To store the current meme URL
+
+        // Function to fetch and display a meme
+        document.getElementById('generateMemeBtn').addEventListener('click', function() {
+            fetch('https://meme-api.com/gimme')
+                .then(response => response.json())
+                .then(data => {
+                    // Clear the container and display the new meme
+                    const memeContainer = document.getElementById('memeContainer');
+                    memeContainer.innerHTML = '';
+                    
+                    const img = document.createElement('img');
+                    img.src = data.url;
+                    img.alt = "Random Meme";
+
+                    memeContainer.appendChild(img);
+
+                    // Enable the favorite button and store the current meme URL
+                    document.getElementById('favoriteBtn').disabled = false;
+                    currentMemeUrl = data.url;
+                })
+                .catch(error => {
+                    console.error('Error fetching the meme:', error);
+                });
+        });
+
+        // Function to send meme URL to Discord Webhook
+        document.getElementById('favoriteBtn').addEventListener('click', function() {
+            if (currentMemeUrl) {
+                const webhookUrl = 'https://discord.com/api/webhooks/1291644457573416970/skxnPs5hze1a5uAF50KeiQqD3d6PDEYsdzYxARiWNUG5akZDO35Jp_z0raoJmigNQg6i'; // Replace with your Discord Webhook URL
+                
+                // Prepare the payload for the webhook
+                const payload = {
+                    content: `Check out this meme: ${currentMemeUrl}`
+                };
+
+                // Send the meme to Discord using fetch
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Meme added to favorites and sent to Discord!');
+                    } else {
+                        alert('Failed to send meme to Discord.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending meme to Discord:', error);
+                    alert('Error sending meme to Discord.');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
